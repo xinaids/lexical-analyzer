@@ -1,47 +1,96 @@
-class DFA:
-    def __init__(self, states, alphabet, transitions, start_state, accept_states):
-        self.states = states
-        self.alphabet = alphabet
-        self.transitions = transitions
-        self.current_state = start_state
-        self.accept_states = accept_states
+import re
 
-    def transition(self, symbol):
-        if symbol not in self.alphabet:
-            raise ValueError("Symbol not in alphabet")
-        self.current_state = self.transitions.get((self.current_state, symbol))
-        if self.current_state is None:
-            raise ValueError("Invalid transition")
+def returnNextState(token):
+  state = "q0"
 
-    def reset(self):
-        self.current_state = self.start_state
+  transitions = {
+    ('q0', re.compile(r'^[a-zA-Z]+$')): 'q1',
+    ('q1', re.compile(r'^[a-zA-Z0-9]+$')): 'q1',
+    ('q0', re.compile(r'^[0-9]+$')): 'q3',
+    ('q3', re.compile(r'^[0-9]+$')): 'q3',
+    ('q3', re.compile(r'^\.$')): 'q5',
+    ('q5', re.compile(r'^[0-9]+$')): 'q6',
+    ('q6', re.compile(r'^[0-9]+$')): 'q6',
+    ('q0', re.compile(r'^\"$')): 'q8',
+    ('q8', re.compile(r'^[^\"]+$')): 'q8',
+    ('q8', re.compile(r'^\"$')): 'q9',
+    ('q8', re.compile(r'^\\n$')): 'q42',
+    ('q0', re.compile(r'^\/$')): 'q10',
+    ('q10', re.compile(r'^\/$')): 'q11',
+    ('q11', re.compile(r'^[^\/]+$')): 'q11',
+    ('q11', re.compile(r'^\\n$')): 'q12',
+    ('q10', re.compile(r'^[^\.]+$')): 'q13',
+    ('q0', re.compile(r'^\+$')): 'q14',
+    ('q0', re.compile(r'^\-$')): 'q15',
+    ('q0', re.compile(r'^\*$')): 'q16',
+    ('q0', re.compile(r'^\%$')): 'q17',
+    ('q0', re.compile(r'^\=$')): 'q18',
+    ('q18', re.compile(r'^\=$')): 'q19',
+    ('q18', re.compile(r'^[^\=]$')): 'q20',
+    ('q0', re.compile(r'^\!$')): 'q21',
+    ('q21', re.compile(r'^\=$')): 'q22',
+    ('q21', re.compile(r'^[^\!]$')): 'q23',
+    ('q0', re.compile(r'^\<$')): 'q24',
+    ('q24', re.compile(r'^\=$')): 'q25',
+    ('q24', re.compile(r'^[^\<]$')): 'q26',
+    ('q0', re.compile(r'^\>$')): 'q27',
+    ('q27', re.compile(r'^\=$')): 'q28',
+    ('q27', re.compile(r'^[^\>]$')): 'q29',
+    ('q0', re.compile(r'^\|$')): 'q30',
+    ('q30', re.compile(r'^\|$')): 'q31',
+    ('q0', re.compile(r'^\&$')): 'q32',
+    ('q32', re.compile(r'^\&$')): 'q33',
+    ('q0', re.compile(r'^\,$')): 'q34',
+    ('q0', re.compile(r'^\;$')): 'q35',
+    ('q0', re.compile(r'^\($')): 'q36',
+    ('q0', re.compile(r'^\)$')): 'q37',
+    ('q0', re.compile(r'^\[$')): 'q38',
+    ('q0', re.compile(r'^\]$')): 'q39',
+    ('q0', re.compile(r'^\{$')): 'q40',
+    ('q0', re.compile(r'^\}$')): 'q41',
+  }
 
-    def is_accepted(self):
-        return self.current_state in self.accept_states
+  finish_states = {
+    'q1': 'ID',
+    'q3': 'NUMINT',
+    'q6': 'NUMDEC',
+    'q9': 'TEXT',
+    'q42': 'ERROR',
+    'q12': 'COMMENT',
+    'q13': '/',
+    'q14': '+',
+    'q15': '-',
+    'q16': '*',
+    'q17': '%',
+    'q19': '==',
+    'q20': '=',
+    'q22': '!=',
+    'q23': '!',
+    'q25': '>=',
+    'q26': '>',
+    'q28': '<=',
+    'q29': '<',
+    'q31': '||',
+    'q33': '&&',
+    'q34': ',',
+    'q35': ';',
+    'q36': '(',
+    'q37': ')',
+    'q38': '[',
+    'q39': ']',
+    'q40': '{',
+    'q41': '}'
+  }
 
-
-# Exemplo de uso
-states = {'q0', 'q1', 'q2'}
-alphabet = {'0', '1'}
-transitions = {
-    ('q0', '0'): 'q1',
-    ('q0', '1'): 'q2',
-    ('q1', '0'): 'q1',
-    ('q1', '1'): 'q1',
-    ('q2', '0'): 'q2',
-    ('q2', '1'): 'q2'
-}
-start_state = 'q0'
-accept_states = {'q1'}
-
-dfa = DFA(states, alphabet, transitions, start_state, accept_states)
-
-# Testando com uma entrada
-input_string = "1111"
-for symbol in input_string:
-    dfa.transition(symbol)
-
-if dfa.is_accepted():
-    print("A entrada é aceita pelo DFA.")
-else:
-    print("A entrada é rejeitada pelo DFA.")
+  for char in token:
+    for (current_state, regex_pattern), next_state in transitions.items():
+      if state == current_state and regex_pattern.match(str(char)):
+        state = next_state
+      
+  if state in finish_states:
+    if finish_states[state] != "ERROR":
+      return finish_states[state]
+    else:
+      return False
+  else:
+    return False
