@@ -1,3 +1,3 @@
 from transitions import returnNextState
 
-print(returnNextState('q6', ''))
+print(returnNextState('q30', "|"))

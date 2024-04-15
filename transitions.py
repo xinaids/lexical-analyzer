@@ -53,8 +53,43 @@ def returnNextState(state, text):
     ('q0', re.compile(r'^\}$')): 'q41',
   }
 
+  finish_states = {
+    'q2': 'ID',
+    'q4': 'NUMINT',
+    'q7': 'NUMDEC',
+    'q9': 'TEXT',
+    'q42': 'ERROR',
+    'q12': 'COMMENT',
+    'q13': '/',
+    'q14': '+',
+    'q15': '-',
+    'q16': '*',
+    'q17': '%',
+    'q19': '==',
+    'q20': '=',
+    'q22': '!=',
+    'q23': '!',
+    'q25': '>=',
+    'q26': '>',
+    'q28': '<=',
+    'q29': '<',
+    'q31': '||',
+    'q33': '&&',
+    'q34': ',',
+    'q35': ';',
+    'q36': '(',
+    'q37': ')',
+    'q38': '[',
+    'q39': ']',
+    'q40': '{',
+    'q41': '}'
+  }
+
   for (current_state, regex_pattern), next_state in transitions.items():
     if state == current_state and regex_pattern.match(str(text)):
-        return next_state
+      if next_state in finish_states:
+        return [next_state, finish_states[next_state]]
+      else:
+        print("Não é estado final")
 
   return None
