@@ -56,7 +56,7 @@ for word in separate_string_input:
     else:
       tokens.append(word)
   else:
-    print("Erro na análise léxica")
+    print("\033[1;31mErro na análise léxica\033[0m")
     break
 
 print("Tokens:", tokens)

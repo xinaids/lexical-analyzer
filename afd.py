@@ -8,6 +8,7 @@ def returnNextState(token):
     ('q1', re.compile(r'^[a-zA-Z0-9]+$')): 'q1',
     ('q0', re.compile(r'^[0-9]+$')): 'q3',
     ('q3', re.compile(r'^[0-9]+$')): 'q3',
+    ('q3', re.compile(r'^[^0-9\.]+$')): 'q4',
     ('q3', re.compile(r'^\.$')): 'q5',
     ('q5', re.compile(r'^[0-9]+$')): 'q6',
     ('q6', re.compile(r'^[0-9]+$')): 'q6',
