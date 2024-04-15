@@ -88,8 +88,8 @@ def returnNextState(state, text):
   for (current_state, regex_pattern), next_state in transitions.items():
     if state == current_state and regex_pattern.match(str(text)):
       if next_state in finish_states:
-        return [next_state, finish_states[next_state]]
+        return ("Estado final:", next_state), ("Token:", finish_states[next_state])
       else:
-        print("Não é estado final")
+        return ("Próximo estado: ", next_state), ("Token:", text)
 
   return None
