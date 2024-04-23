@@ -8,7 +8,7 @@ num_dec = []
 text = []
 tokens = []
 
-def token_separation(text):
+def token_separation(string):
   global separate_string_input
   temp = ''
   quote_counter = 0
@@ -34,7 +34,7 @@ def token_separation(text):
       separate_string_input.append(temp)
       temp = ''
 
-string = 'int main ( ) { int x = 6.25 ; }'
+string = 'int main ( ) { int x = "sadasd"; int y == 6.25 + 1 ; }'
 token_separation(string)
 
 for word in separate_string_input:
@@ -43,22 +43,23 @@ for word in separate_string_input:
       tokens.append(reserved_words[word])
     elif returnNextState(word) == 'ID':
       id.append(word)
-      tokens.append(word)
+      tokens.append("ID_" + str(id.index(word)))
     elif returnNextState(word) == 'NUMINT':
       num_int.append(word)
-      tokens.append(word)
+      tokens.append("NUMINT_" + str(num_int.index(word)))
     elif returnNextState(word) == 'NUMDEC':
       num_dec.append(word)
-      tokens.append(word)
+      tokens.append("NUMDEC_" + str(num_dec.index(word)))
     elif returnNextState(word) == 'TEXT':
       text.append(word)
-      tokens.append(word)
+      tokens.append("TEXT_" + str(text.index(word)))
     else:
-      tokens.append(word)
+      tokens.append(returnNextState(word))
   else:
     print("\033[1;31mErro na análise léxica\033[0m")
     break
 
+print("Separate string:", separate_string_input)
 print("Tokens:", tokens)
 print("ID: ", id)
 print("NUMINT", num_int)

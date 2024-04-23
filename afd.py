@@ -4,23 +4,27 @@ def returnNextState(token):
   state = "q0"
 
   transitions = {
-    ('q0', re.compile(r'^[a-zA-Z]+$')): 'q1',
-    ('q1', re.compile(r'^[a-zA-Z0-9]+$')): 'q1',
-    ('q0', re.compile(r'^[0-9]+$')): 'q3',
-    ('q3', re.compile(r'^[0-9]+$')): 'q3',
-    ('q3', re.compile(r'^[^0-9\.]+$')): 'q4',
+    ('q0', re.compile(r'^[a-zA-Z]$')): 'q1',
+    ('q1', re.compile(r'^[a-zA-Z0-9]$')): 'q1',
+
+    ('q0', re.compile(r'^[0-9]$')): 'q3',
+    ('q3', re.compile(r'^[0-9]$')): 'q3',
+    ('q3', re.compile(r'^[^0-9\.]$')): 'q4',
     ('q3', re.compile(r'^\.$')): 'q5',
-    ('q5', re.compile(r'^[0-9]+$')): 'q6',
-    ('q6', re.compile(r'^[0-9]+$')): 'q6',
+    ('q5', re.compile(r'^[0-9]$')): 'q6',
+    ('q6', re.compile(r'^[0-9]$')): 'q6',
+
     ('q0', re.compile(r'^\"$')): 'q8',
-    ('q8', re.compile(r'^[^\"]+$')): 'q8',
+    ('q8', re.compile(r'^[^\"]$')): 'q8',
     ('q8', re.compile(r'^\"$')): 'q9',
-    ('q8', re.compile(r'^\\n$')): 'q42',
+    ('q8', re.compile(r'\n')): 'q42',
+
     ('q0', re.compile(r'^\/$')): 'q10',
     ('q10', re.compile(r'^\/$')): 'q11',
-    ('q11', re.compile(r'^[^\/]+$')): 'q11',
-    ('q11', re.compile(r'^\\n$')): 'q12',
-    ('q10', re.compile(r'^[^\.]+$')): 'q13',
+    ('q11', re.compile(r'^[^\/]$')): 'q11',
+    ('q11', re.compile(r'\n')): 'q12',
+    ('q10', re.compile(r'^[^\/]$')): 'q13',
+    
     ('q0', re.compile(r'^\+$')): 'q14',
     ('q0', re.compile(r'^\-$')): 'q15',
     ('q0', re.compile(r'^\*$')): 'q16',

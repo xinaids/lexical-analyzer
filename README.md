@@ -14,5 +14,3 @@
 3. Análise do retorno do Autômato Finito Determinístico
 4. Se o retorno é diferente de falso, é analisado se o token está incluso no grupo de palavras reservadas
 5. Se existe no grupo de palavras reservadas, salva no array de tokens finais como palavra reservada
-
-Obs.: Funcionando com alguns erros de expressões regulares.
