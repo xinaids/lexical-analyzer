@@ -1,0 +1,4 @@
+int main () { 
+  char x = "s" ; 
+  int y = 6.25 + 1;
+}

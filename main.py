@@ -1,5 +1,7 @@
 from reserved_words import reserved_words
 from afd import returnNextState
+from read_file import save_string
+import re
 
 separate_string_input = []
 id = []
@@ -14,9 +16,13 @@ def token_separation(string):
   quote_counter = 0
 
   for char in string:
-    if temp == '' and char == '"':
+    if re.match(r'[^a-zA-Z0-9\s."]', char):
+      separate_string_input.append(temp)
+      separate_string_input.append(char)
+      temp = ''
+    elif temp == '' and char == '"' and quote_counter == 0:
       temp += char
-      quote_counter = 1
+      quote_counter = 1      
     elif char == string[len(string)-1]:
       temp += char
       separate_string_input.append(temp)
@@ -34,10 +40,12 @@ def token_separation(string):
       separate_string_input.append(temp)
       temp = ''
 
-string = 'int main ( ) { int x = "sadasd"; int y == 6.25 + 1 ; }'
+  separate_string_input = [item for item in separate_string_input if item]
+
+string = save_string()
 token_separation(string)
 
-for word in separate_string_input:
+for  word in separate_string_input:
   if returnNextState(word) != False:
     if word in reserved_words:
       tokens.append(reserved_words[word])
