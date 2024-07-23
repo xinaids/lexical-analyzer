@@ -7,6 +7,10 @@
 
 - Caso instale uma nova dependência, digite no terminal: ```pip freeze > requirements.txt```
 
+## Como executar
+
+```python3 main.py```
+
 ## Caminho a ser seguido 
 
 1. Separação dos primeiros tokens da string de entrada
