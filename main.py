@@ -45,7 +45,7 @@ def token_separation(string):
 string = save_string()
 token_separation(string)
 
-for  word in separate_string_input:
+for word in separate_string_input:
   if returnNextState(word) != False:
     if word in reserved_words:
       tokens.append(reserved_words[word])
