@@ -3,145 +3,174 @@ from afd import returnNextState
 from read_file import save_string
 import re
 
-separate_string_input = []
+# Listas auxiliares
 id = []
 num_int = []
 num_dec = []
 text = []
 chars = []
-comments = []
-tokens = []
+# comments removidos da saída final
+
+# Lista final de tokens organizados por linha
+tokens_by_line = []
+
 
 def token_separation(string):
-    global separate_string_input
+    tokens = []
+    line = 1
+    col = 1
     temp = ''
     quote_counter = 0
     single_quote_counter = 0
-
     i = 0
+
     while i < len(string):
         char = string[i]
 
-        # Ignora quebras de linha
+        # Quebra de linha
         if char == '\n':
             if temp:
-                separate_string_input.append(temp)
+                tokens.append((temp, line, col - len(temp)))
                 temp = ''
+            if tokens:
+                tokens_by_line.append(tokens)
+                tokens = []
+            line += 1
+            col = 1
             i += 1
             continue
 
-        # Comentários de linha (// até o fim da linha)
-        if char == '/' and i + 1 < len(string) and string[i+1] == '/':
+        # Comentários de linha // -> ignora
+        if char == '/' and i + 1 < len(string) and string[i + 1] == '/':
             if temp:
-                separate_string_input.append(temp)
+                tokens.append((temp, line, col - len(temp)))
                 temp = ''
-            comment = ''
             while i < len(string) and string[i] != '\n':
-                comment += string[i]
                 i += 1
-            separate_string_input.append(comment)
+                col += 1
             continue
 
-        # Strings (aspas duplas)
+        # Strings
         if char == '"' and quote_counter == 0:
             if temp:
-                separate_string_input.append(temp)
+                tokens.append((temp, line, col - len(temp)))
                 temp = ''
             temp += char
             quote_counter = 1
         elif char == '"' and quote_counter == 1:
             temp += char
-            separate_string_input.append(temp)
+            tokens.append((temp, line, col - len(temp) + 1))
             temp = ''
             quote_counter = 0
         elif quote_counter == 1:
             temp += char
 
-        # Chars (aspas simples)
+        # Chars
         elif char == "'" and single_quote_counter == 0:
             if temp:
-                separate_string_input.append(temp)
+                tokens.append((temp, line, col - len(temp)))
                 temp = ''
             temp += char
             single_quote_counter = 1
         elif char == "'" and single_quote_counter == 1:
             temp += char
-            separate_string_input.append(temp)
+            tokens.append((temp, line, col - len(temp) + 1))
             temp = ''
             single_quote_counter = 0
         elif single_quote_counter == 1:
             temp += char
 
-        # Operadores compostos (==, <=, >=, !=)
-        elif char in ['=', '<', '>', '!'] and i + 1 < len(string) and string[i+1] == '=':
+        # Operadores compostos
+        elif char in ['=', '<', '>', '!'] and i + 1 < len(string) and string[i + 1] == '=':
             if temp:
-                separate_string_input.append(temp)
+                tokens.append((temp, line, col - len(temp)))
                 temp = ''
-            separate_string_input.append(char + '=')
-            i += 1  # pula o próximo '='
+            tokens.append((char + '=', line, col))
+            i += 1
+            col += 2
+            continue
 
         # Símbolos isolados
         elif re.match(r'[^a-zA-Z0-9\s."\']', char):
             if temp:
-                separate_string_input.append(temp)
+                tokens.append((temp, line, col - len(temp)))
                 temp = ''
-            separate_string_input.append(char)
+            tokens.append((char, line, col))
 
         # Último caractere
         elif i == len(string) - 1:
             temp += char
-            separate_string_input.append(temp)
+            tokens.append((temp, line, col - len(temp) + 1))
             temp = ''
         elif not char.isspace():
             temp += char
         else:
             if temp:
-                separate_string_input.append(temp)
+                tokens.append((temp, line, col - len(temp)))
                 temp = ''
         i += 1
+        col += 1
 
-    separate_string_input = [item for item in separate_string_input if item]
+    if temp:
+        tokens.append((temp, line, col - len(temp)))
+    if tokens:
+        tokens_by_line.append(tokens)
+
 
 string = save_string()
 token_separation(string)
 
-for word in separate_string_input:
-    # Comentários tratados direto aqui
-    if word.startswith("//"):
-        comments.append(word)
-        tokens.append("COMMENT_" + str(comments.index(word)))
-        continue
+# dicionario de simbolos
+symbol_map = {
+    '=': "ATRIBUICAO",
+    '==': "COMPARACAO_IGUAL",
+    '!=': "COMPARACAO_DIFERENTE",
+    '<': "MENOR",
+    '<=': "MENOR_IGUAL",
+    '>': "MAIOR",
+    '>=': "MAIOR_IGUAL",
+    '+': "SOMA",
+    '-': "SUBTRACAO",
+    '*': "MULTIPLICACAO",
+    '%': "MODULO",
+    ';': "DELIMITADOR",
+    ',': "VIRGULA",
+    '(': "ABRE_PARENTESE",
+    ')': "FECHA_PARENTESE",
+    '{': "ABRE_CHAVE",
+    '}': "FECHA_CHAVE",
+    '[': "ABRE_COLCHETE",
+    ']': "FECHA_COLCHETE"
+}
 
-    state = returnNextState(word)
-    if state != False:
-        if word in reserved_words:
-            tokens.append(reserved_words[word])
-        elif state == 'ID':
-            id.append(word)
-            tokens.append("ID_" + str(id.index(word)))
-        elif state == 'NUMINT':
-            num_int.append(word)
-            tokens.append("NUMINT_" + str(num_int.index(word)))
-        elif state == 'NUMDEC':
-            num_dec.append(word)
-            tokens.append("NUMDEC_" + str(num_dec.index(word)))
-        elif state == 'TEXT':
-            text.append(word)
-            tokens.append("TEXT_" + str(text.index(word)))
-        elif state == 'CHAR':
-            chars.append(word)
-            tokens.append("CHAR_" + str(chars.index(word)))
+# Processa tokens e imprime no formato pedido
+for line_tokens in tokens_by_line:
+    out = []
+    for word, line, col in line_tokens:
+        state = returnNextState(word)
+        if state != False:
+            if word in reserved_words:
+                out.append(f"<PALAVRA_RESERVADA, {word}, {line}, {col}>")
+            elif state == 'ID':
+                id.append(word)
+                out.append(f"<ID, {word}, {line}, {col}>")
+            elif state == 'NUMINT':
+                num_int.append(word)
+                out.append(f"<NUMERO_INTEIRO, {word}, {line}, {col}>")
+            elif state == 'NUMDEC':
+                num_dec.append(word)
+                out.append(f"<NUMERO_DECIMAL, {word}, {line}, {col}>")
+            elif state == 'TEXT':
+                text.append(word)
+                out.append(f"<STRING, {word}, {line}, {col}>")
+            elif state == 'CHAR':
+                chars.append(word)
+                out.append(f"<CARACTERE, {word}, {line}, {col}>")
+            elif state in symbol_map:
+                out.append(f"<{symbol_map[state]}, {word}, {line}, {col}>")
+            else:
+                out.append(f"<{state}, {word}, {line}, {col}>")
         else:
-            tokens.append(state)
-    else:
-        print("\033[1;31mErro na análise léxica\033[0m")
-        break
-
-print("Separate string:", separate_string_input)
-print("Tokens:", tokens)
-print("ID: ", id)
-print("NUMINT", num_int)
-print("NUMDEC", num_dec)
-print("TEXT: ", text)
-print("CHAR: ", chars)
-print("COMMENT: ", comments)
+            print(f"\033[1;31mErro na análise léxica na linha {line}, coluna {col}\033[0m")
+            break
+    print(" ".join(out))
