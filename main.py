@@ -9,11 +9,9 @@ num_int = []
 num_dec = []
 text = []
 chars = []
-# comments removidos da saída final
 
 # Lista final de tokens organizados por linha
 tokens_by_line = []
-
 
 def token_separation(string):
     tokens = []
@@ -120,57 +118,65 @@ def token_separation(string):
 string = save_string()
 token_separation(string)
 
-# dicionario de simbolos
-symbol_map = {
+# Classes de símbolos
+class_map = {
     '=': "ATRIBUICAO",
-    '==': "COMPARACAO_IGUAL",
-    '!=': "COMPARACAO_DIFERENTE",
-    '<': "MENOR",
-    '<=': "MENOR_IGUAL",
-    '>': "MAIOR",
-    '>=': "MAIOR_IGUAL",
-    '+': "SOMA",
-    '-': "SUBTRACAO",
-    '*': "MULTIPLICACAO",
-    '%': "MODULO",
+    '==': "COMPARACAO",
+    '!=': "COMPARACAO",
+    '<': "COMPARACAO",
+    '<=': "COMPARACAO",
+    '>': "COMPARACAO",
+    '>=': "COMPARACAO",
+
+    '+': "ARITMETICO",
+    '-': "ARITMETICO",
+    '*': "ARITMETICO",
+    '%': "ARITMETICO",
+
     ';': "DELIMITADOR",
-    ',': "VIRGULA",
-    '(': "ABRE_PARENTESE",
-    ')': "FECHA_PARENTESE",
-    '{': "ABRE_CHAVE",
-    '}': "FECHA_CHAVE",
-    '[': "ABRE_COLCHETE",
-    ']': "FECHA_COLCHETE"
+    ',': "DELIMITADOR",
+
+    '(': "AGRUPADOR",
+    ')': "AGRUPADOR",
+    '{': "AGRUPADOR",
+    '}': "AGRUPADOR",
+    '[': "AGRUPADOR",
+    ']': "AGRUPADOR",
 }
 
-# Processa tokens e imprime no formato pedido
-for line_tokens in tokens_by_line:
-    out = []
-    for word, line, col in line_tokens:
-        state = returnNextState(word)
-        if state != False:
-            if word in reserved_words:
-                out.append(f"<PALAVRA_RESERVADA, {word}, {line}, {col}>")
-            elif state == 'ID':
-                id.append(word)
-                out.append(f"<ID, {word}, {line}, {col}>")
-            elif state == 'NUMINT':
-                num_int.append(word)
-                out.append(f"<NUMERO_INTEIRO, {word}, {line}, {col}>")
-            elif state == 'NUMDEC':
-                num_dec.append(word)
-                out.append(f"<NUMERO_DECIMAL, {word}, {line}, {col}>")
-            elif state == 'TEXT':
-                text.append(word)
-                out.append(f"<STRING, {word}, {line}, {col}>")
-            elif state == 'CHAR':
-                chars.append(word)
-                out.append(f"<CARACTERE, {word}, {line}, {col}>")
-            elif state in symbol_map:
-                out.append(f"<{symbol_map[state]}, {word}, {line}, {col}>")
+# --- saída no console e no arquivo ---
+with open("resultado.txt", "w", encoding="utf-8") as f:
+    for line_tokens in tokens_by_line:
+        out = []
+        for word, line, col in line_tokens:
+            state = returnNextState(word)
+            if state != False:
+                if word in reserved_words:
+                    out.append(f"<PALAVRA_RESERVADA, {word}, {line}, {col}>")
+                elif state == 'ID':
+                    id.append(word)
+                    out.append(f"<ID, {word}, {line}, {col}>")
+                elif state == 'NUMINT':
+                    num_int.append(word)
+                    out.append(f"<NUMERO_INTEIRO, {word}, {line}, {col}>")
+                elif state == 'NUMDEC':
+                    num_dec.append(word)
+                    out.append(f"<NUMERO_DECIMAL, {word}, {line}, {col}>")
+                elif state == 'TEXT':
+                    text.append(word)
+                    out.append(f"<STRING, {word}, {line}, {col}>")
+                elif state == 'CHAR':
+                    chars.append(word)
+                    out.append(f"<CARACTERE, {word}, {line}, {col}>")
+                elif state in class_map:
+                    out.append(f"<{class_map[state]}, {word}, {line}, {col}>")
+                else:
+                    out.append(f"<{state}, {word}, {line}, {col}>")
             else:
-                out.append(f"<{state}, {word}, {line}, {col}>")
-        else:
-            print(f"\033[1;31mErro na análise léxica na linha {line}, coluna {col}\033[0m")
-            break
-    print(" ".join(out))
+                msg = f"Erro na análise léxica na linha {line}, coluna {col}"
+                print("\033[1;31m" + msg + "\033[0m")
+                f.write(msg + "\n")
+                break
+        line_out = " ".join(out)
+        print(line_out)
+        f.write(line_out + "\n")
